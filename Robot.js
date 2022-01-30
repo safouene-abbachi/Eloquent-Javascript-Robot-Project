@@ -190,3 +190,34 @@ function compareRobots(robot1, memory1, robot2, memory2) {
 compareRobots(routeRobot, [], goalOrientedRobot, []);
 
 //*____________Robot efficiency_________*//
+
+const lazyRobot = ({ place, parcels }, route) => {
+  //if there is no more wors the robot has to choose wich direction to take
+  if (route.length === 0) {
+    //instead of checking one parcel in a row we'll map over all parcels and choose the shortest ones
+    let routes = parcels.map((parcel) => {
+      if (parcel.place !== place) {
+        return {
+          route: findRoute(roadMaps, place, parcel.place),
+          pickUp: true,
+        };
+      } else {
+        return {
+          route: findRoute(roadMaps, place, parcel.address),
+          pickUp: false,
+        };
+      }
+    });
+
+    const calculateScore = ({ route, pickUp }) => {
+      return (pickUp ? 2 : 1) - route.length;
+    };
+    route = routes.reduce((a, b) =>
+      calculateScore(a) > calculateScore(b) ? a : b
+    ).route;
+
+    return { direction: route[0], memory: route.slice(1) };
+  }
+};
+
+// runRobotAnimation(VillageState.random(), lazyRobot, []);
